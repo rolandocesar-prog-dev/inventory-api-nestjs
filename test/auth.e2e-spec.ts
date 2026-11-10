@@ -42,7 +42,7 @@ describe('Autenticación (e2e)', () => {
       'otra-clave-larga',
     ).expect(401);
 
-    expect(wrongPassword.body.message).toBe(unknownEmail.body.message);
+    expect(wrongPassword.body.detail).toBe(unknownEmail.body.detail);
   });
 
   it('responde 401 si el usuario está desactivado', async () => {

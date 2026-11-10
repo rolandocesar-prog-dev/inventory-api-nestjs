@@ -71,7 +71,7 @@ describe('Movimientos de stock (e2e)', () => {
 
     const res = await post('out', { productId, quantity: 3 }).expect(422);
 
-    expect(res.body.message).toMatch(/Stock insuficiente/);
+    expect(res.body.detail).toMatch(/Stock insuficiente/);
     expect(await stock()).toBe(2);
     expect(await t.prisma.stockMovement.count()).toBe(1);
   });

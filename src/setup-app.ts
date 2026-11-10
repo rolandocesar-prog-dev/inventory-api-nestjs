@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ProblemDetailsFilter } from './common/problem-details.filter.js';
 
 export const API_PREFIX = 'api/v1';
 
@@ -11,6 +12,8 @@ export function setupApp(app: INestApplication): void {
   app.setGlobalPrefix(API_PREFIX, { exclude: ['health'] });
   app.enableShutdownHooks();
   // Rechaza campos desconocidos y convierte tipos según los DTO (RNF-01).
+  // Errores en formato RFC 9457 (problem details).
+  app.useGlobalFilters(new ProblemDetailsFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
