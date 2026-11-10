@@ -29,13 +29,21 @@ Rutas de negocio bajo `/api/v1`; `/health` y `/docs` fuera del prefijo.
 | -------------- | -------------------------------- | ---------------------------------------------------------- |
 | Framework      | NestJS 12 (ESM)                  | Modular, inyección de dependencias, muy usado en empresas. |
 | Base de datos  | PostgreSQL 16                    | Transacciones y bloqueos fiables para el stock.            |
-| Acceso a datos | Prisma                           | Esquema tipado, migraciones versionadas.                   |
+| Acceso a datos | Prisma 7 + `@prisma/adapter-pg`  | Esquema tipado, migraciones versionadas, driver `pg`.      |
+| Salud          | @nestjs/terminus                 | Chequeos estándar con 503 cuando falla una dependencia.    |
 | Validación     | class-validator + ValidationPipe | Integrado con Nest y con Swagger.                          |
 | Autenticación  | @nestjs/jwt + passport-jwt       | Estándar del ecosistema.                                   |
 | Pruebas        | Vitest + Supertest               | Lo que genera Nest 12; rápido y compatible con ESM.        |
 | Lint / formato | oxlint + Prettier                | Lo que genera Nest 12; lint con información de tipos.      |
 
 ## 3. Modelo de datos
+
+Prisma 7 usa el generador `prisma-client` (ESM, extensión `.js` en los imports) con salida en
+`src/generated/prisma/`. Ese código **no se versiona**: se genera con `npm run prisma:generate`,
+que también corre antes de `build`, del lint y de las pruebas en el CI. La conexión la abre el
+adaptador `@prisma/adapter-pg` (driver `pg`); la URL de la CLI se lee en `prisma.config.ts`.
+Las tablas y columnas se nombran en _snake_case_ con `@@map`/`@map`; abajo se muestra el modelo
+lógico.
 
 ```prisma
 model User {
@@ -91,7 +99,7 @@ enum MovementType { IN OUT ADJUSTMENT }
 La salida se hace con **una sola sentencia condicional** dentro de una transacción:
 
 ```sql
-UPDATE "Product" SET stock = stock - $qty
+UPDATE products SET stock = stock - $qty
 WHERE id = $id AND stock >= $qty
 RETURNING stock;
 ```
@@ -121,3 +129,21 @@ Formato uniforme (RFC 9457, _problem details_):
 | Unitarias | Servicios con repositorios simulados.                             | `src/**/*.spec.ts`                   |
 | e2e       | Endpoints contra PostgreSQL real (contenedor de servicio en CI).  | `test/**/*.e2e-spec.ts`              |
 | Carrera   | 20 salidas concurrentes del mismo producto; stock final correcto. | `test/stock-concurrency.e2e-spec.ts` |
+
+Las pruebas e2e usan una base aparte (`TEST_DATABASE_URL`, por defecto `inventory_test`): un
+_global setup_ aplica las migraciones con `prisma migrate deploy` y cada archivo vacía las tablas
+que usa. Los archivos e2e corren en serie porque comparten la base. En el CI, PostgreSQL 16 corre
+como contenedor de servicio del job.
+
+## 6. Configuración y operación
+
+- **Variables de entorno** validadas al iniciar con `class-validator` en `ConfigModule.validate`
+  (`src/config/env.validation.ts`). Si algo falla, el proceso termina con la lista de variables
+  inválidas, sin imprimir sus valores. Hoy: `NODE_ENV`, `PORT` y `DATABASE_URL`.
+- **`PrismaService`** extiende el cliente generado, conecta en `onModuleInit` y desconecta en
+  `onModuleDestroy`; `enableShutdownHooks()` hace que SIGTERM dispare ese cierre.
+- **`GET /health`** usa terminus: `PrismaHealthIndicator.pingCheck` (`SELECT 1`, 1,5 s de
+  límite). Responde 200 con `{ status: "ok", info: { database: { status: "up" } } }` o 503 con el
+  detalle en `error`. El _healthcheck_ de Docker llama a esta ruta.
+- **Puertos locales**: el `docker-compose.yml` publica PostgreSQL en `127.0.0.1:5443` (5432,
+  5433 y 5442 los usan otros proyectos del equipo) y la API en `127.0.0.1:3000`.

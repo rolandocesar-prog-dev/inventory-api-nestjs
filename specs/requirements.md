@@ -62,7 +62,13 @@ Criterios de aceptación en formato EARS.
 ### RF-05 · Operación
 
 - `GET /health` DEBE responder el estado de la API y de la base de datos.
+- SI la base de datos no responde, `GET /health` DEBE responder 503 indicando qué dependencia
+  falla, para que Docker y la plataforma de despliegue detecten el problema.
 - La documentación OpenAPI DEBE estar disponible en `/docs`.
+- SI falta una variable de entorno obligatoria o tiene un valor inválido, la API NO DEBE arrancar
+  y DEBE indicar qué variable está mal (sin mostrar su valor).
+- CUANDO la API recibe la señal de apagado, DEBE cerrar las conexiones a la base de datos antes de
+  terminar.
 
 ## 5. Requisitos no funcionales
 
