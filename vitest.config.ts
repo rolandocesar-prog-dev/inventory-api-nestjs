@@ -12,8 +12,13 @@ export default defineConfig({
     include: ['**/*.spec.ts'],
     coverage: {
       include: ['src/**/*.ts'],
-      // Código generado y de arranque; el arranque se cubre en las pruebas e2e.
-      exclude: ['src/generated/**', 'src/main.ts', 'src/**/*.spec.ts'],
+      // Código generado, de arranque y módulos declarativos: se cubren en las pruebas e2e.
+      exclude: [
+        'src/generated/**',
+        'src/main.ts',
+        'src/**/*.module.ts',
+        'src/**/*.spec.ts',
+      ],
     },
   },
 });
