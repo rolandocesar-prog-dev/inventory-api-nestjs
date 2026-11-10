@@ -43,6 +43,9 @@ Criterios de aceptación en formato EARS.
 - SI el rol del usuario no permite la operación, la API DEBE responder 403.
 - Solo un admin DEBE poder crear, listar, cambiar el rol y desactivar usuarios
   (`/api/v1/users`); SI el correo ya existe, la API DEBE responder 409.
+- CUANDO un admin desactiva a un usuario, la API DEBE revocar sus sesiones; SI un admin intenta
+  desactivarse o quitarse el rol de admin a sí mismo, la API DEBE responder 422 (evita quedarse
+  sin administradores).
 - Las contraseñas DEBEN guardarse con un hash lento (argon2 o bcrypt), nunca en texto plano, y
   tener al menos 10 caracteres.
 
