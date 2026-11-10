@@ -5,6 +5,7 @@ describe('validateEnv', () => {
     NODE_ENV: 'production',
     PORT: '8080',
     DATABASE_URL: 'postgresql://inventory:secreto@db:5432/inventory',
+    JWT_SECRET: 'x'.repeat(32),
   };
 
   it('acepta una configuración válida y convierte los tipos', () => {
@@ -16,7 +17,10 @@ describe('validateEnv', () => {
   });
 
   it('usa valores por defecto para NODE_ENV y PORT', () => {
-    const env = validateEnv({ DATABASE_URL: valid.DATABASE_URL });
+    const env = validateEnv({
+      DATABASE_URL: valid.DATABASE_URL,
+      JWT_SECRET: valid.JWT_SECRET,
+    });
 
     expect(env.NODE_ENV).toBe(NodeEnv.Development);
     expect(env.PORT).toBe(3000);
@@ -32,9 +36,10 @@ describe('validateEnv', () => {
         NODE_ENV: 'staging',
         PORT: '99999',
         DATABASE_URL: 'mysql://usuario:clave-secreta@db/inventory',
+        JWT_SECRET: 'corto',
       });
 
-    expect(run).toThrow(/NODE_ENV, PORT, DATABASE_URL/);
+    expect(run).toThrow(/NODE_ENV, PORT, DATABASE_URL, JWT_SECRET/);
     expect(run).not.toThrow(/clave-secreta/);
   });
 });

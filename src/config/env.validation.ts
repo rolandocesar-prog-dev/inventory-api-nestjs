@@ -1,5 +1,14 @@
 import { plainToInstance } from 'class-transformer';
-import { IsEnum, IsInt, IsUrl, Max, Min, validateSync } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsString,
+  IsUrl,
+  Max,
+  Min,
+  MinLength,
+  validateSync,
+} from 'class-validator';
 
 export enum NodeEnv {
   Development = 'development',
@@ -24,6 +33,11 @@ export class EnvironmentVariables {
     require_protocol: true,
   })
   DATABASE_URL!: string;
+
+  /** Firma de los tokens de acceso (HS256): al menos 32 caracteres aleatorios. */
+  @IsString()
+  @MinLength(32)
+  JWT_SECRET!: string;
 }
 
 /**

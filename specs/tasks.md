@@ -21,7 +21,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 ## M2 · Autenticación (RF-01)
 
 - [x] Usuarios con contraseña en hash (argon2) y tabla `refresh_tokens`.
-- [ ] Login, token de acceso y de renovación, con rotación, detección de reutilización y logout.
+- [x] Login, token de acceso y de renovación, con rotación, detección de reutilización y logout.
 - [ ] Guards de JWT y de roles; `GET /auth/me`; pruebas e2e de 401 y 403.
 - [ ] Gestión de usuarios para el admin (`/users`: crear, listar, cambiar rol, desactivar).
 - [ ] Límite de peticiones en el login (RNF-02).
