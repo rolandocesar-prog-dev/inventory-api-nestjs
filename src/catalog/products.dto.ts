@@ -13,6 +13,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { PageMeta, PaginationQueryDto } from '../common/pagination.js';
 import { CategoryResponse } from './categories.dto.js';
 
 const trimUpper = ({ value }: { value: unknown }) =>
@@ -92,4 +93,37 @@ export class ProductResponse {
 
   @ApiProperty()
   updatedAt!: Date;
+}
+
+export class ListProductsQueryDto extends PaginationQueryDto {
+  @ApiPropertyOptional({ description: 'Busca en el nombre y el SKU' })
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MaxLength(100)
+  search?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @ApiPropertyOptional({
+    default: false,
+    description: 'Incluir los desactivados',
+  })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  @IsBoolean()
+  includeInactive: boolean = false;
+}
+
+export class ProductPageResponse {
+  @ApiProperty({ type: [ProductResponse] })
+  data!: ProductResponse[];
+
+  @ApiProperty({ type: PageMeta })
+  meta!: PageMeta;
 }

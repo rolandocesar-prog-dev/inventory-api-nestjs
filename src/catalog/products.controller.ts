@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -23,8 +24,11 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators.js';
 import { Role } from '../generated/prisma/client.js';
+import type { Paginated } from '../common/pagination.js';
 import {
   CreateProductDto,
+  ListProductsQueryDto,
+  ProductPageResponse,
   ProductResponse,
   UpdateProductDto,
 } from './products.dto.js';
@@ -35,6 +39,12 @@ import { ProductsService, type ProductView } from './products.service.js';
 @Controller('products')
 export class ProductsController {
   constructor(private readonly products: ProductsService) {}
+
+  @Get()
+  @ApiOkResponse({ type: ProductPageResponse })
+  list(@Query() query: ListProductsQueryDto): Promise<Paginated<ProductView>> {
+    return this.products.list(query);
+  }
 
   @Get(':id')
   @ApiOkResponse({ type: ProductResponse })

@@ -28,8 +28,64 @@ const row = {
 };
 
 describe('ProductsService', () => {
-  const product = { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() };
-  const service = new ProductsService({ product } as unknown as PrismaService);
+  const product = {
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
+    findMany: vi.fn(),
+    count: vi.fn(),
+  };
+  const service = new ProductsService({
+    product,
+    $transaction: (ops: Promise<unknown>[]) => Promise.all(ops),
+  } as unknown as PrismaService);
+
+  describe('list', () => {
+    it('por defecto solo activos, con la página pedida y el total', async () => {
+      product.findMany.mockResolvedValue([row]);
+      product.count.mockResolvedValue(21);
+
+      const result = await service.list({ page: 2, pageSize: 20 });
+
+      expect(product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { active: true },
+          skip: 20,
+          take: 20,
+        }),
+      );
+      expect(result.meta).toEqual({
+        page: 2,
+        pageSize: 20,
+        total: 21,
+        totalPages: 2,
+      });
+      expect(result.data[0]?.price).toBe('45.50');
+    });
+
+    it('combina búsqueda por nombre o SKU, categoría e inactivos', async () => {
+      product.findMany.mockResolvedValue([]);
+      product.count.mockResolvedValue(0);
+
+      await service.list({
+        page: 1,
+        pageSize: 10,
+        search: 'mart',
+        categoryId: 'c1',
+        includeInactive: true,
+      });
+
+      expect(product.count).toHaveBeenCalledWith({
+        where: {
+          categoryId: 'c1',
+          OR: [
+            { name: { contains: 'mart', mode: 'insensitive' } },
+            { sku: { contains: 'mart', mode: 'insensitive' } },
+          ],
+        },
+      });
+    });
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();

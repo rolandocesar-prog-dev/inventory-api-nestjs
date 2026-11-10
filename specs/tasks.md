@@ -31,7 +31,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 
 - [x] Categorías: listar, crear y renombrar, con nombre único (409).
 - [x] Productos: crear, consultar, actualizar y desactivar con DTOs validados; SKU único (409).
-- [ ] Paginación, búsqueda y filtros del listado de productos.
+- [x] Paginación, búsqueda y filtros del listado de productos.
 
 ## M4 · Stock (RF-03)
 

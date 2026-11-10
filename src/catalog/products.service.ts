@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { pageArgs, pageMeta, type Paginated } from '../common/pagination.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import {
   isForeignKeyViolation,
@@ -19,6 +20,14 @@ export interface ProductInput {
   categoryId: string;
   price: number;
   minStock?: number;
+}
+
+export interface ProductFilters {
+  page: number;
+  pageSize: number;
+  search?: string;
+  categoryId?: string;
+  includeInactive?: boolean;
 }
 
 export type ProductChanges = Partial<ProductInput> & { active?: boolean };
@@ -70,6 +79,41 @@ export class ProductsService {
     } catch (error) {
       throw translate(error);
     }
+  }
+
+  /** Listado paginado; datos y total en una transacción para que sean coherentes. */
+  async list({
+    page,
+    pageSize,
+    search,
+    categoryId,
+    includeInactive = false,
+  }: ProductFilters): Promise<Paginated<ProductView>> {
+    const where: Prisma.ProductWhereInput = {
+      ...(includeInactive ? {} : { active: true }),
+      ...(categoryId ? { categoryId } : {}),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { sku: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.product.findMany({
+        where,
+        include: productInclude,
+        orderBy: [{ name: 'asc' }, { sku: 'asc' }],
+        ...pageArgs(page, pageSize),
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+    return {
+      data: rows.map(toProductView),
+      meta: pageMeta(page, pageSize, total),
+    };
   }
 
   async findById(id: string): Promise<ProductView> {
