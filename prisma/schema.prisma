@@ -1,0 +1,79 @@
+// Esquema de datos de la API de inventario. Diseño en specs/design.md §3.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+model User {
+  id           String          @id @default(uuid()) @db.Uuid
+  email        String          @unique
+  passwordHash String          @map("password_hash")
+  role         Role            @default(OPERATOR)
+  active       Boolean         @default(true)
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  movements    StockMovement[]
+
+  @@map("users")
+}
+
+model Category {
+  id       String    @id @default(uuid()) @db.Uuid
+  name     String    @unique
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id         String          @id @default(uuid()) @db.Uuid
+  sku        String          @unique
+  name       String
+  categoryId String          @map("category_id") @db.Uuid
+  category   Category        @relation(fields: [categoryId], references: [id])
+  price      Decimal         @db.Decimal(12, 2)
+  /// Nunca negativo: lo garantiza la salida condicional y un CHECK en la base (RF-03).
+  stock      Int             @default(0)
+  minStock   Int             @default(0) @map("min_stock")
+  active     Boolean         @default(true)
+  createdAt  DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  movements  StockMovement[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+model StockMovement {
+  id         String       @id @default(uuid()) @db.Uuid
+  productId  String       @map("product_id") @db.Uuid
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Restrict)
+  userId     String       @map("user_id") @db.Uuid
+  user       User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  type       MovementType
+  /// Siempre positiva; el signo lo define el tipo.
+  quantity   Int
+  stockAfter Int          @map("stock_after")
+  reason     String?
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([productId, createdAt])
+  @@map("stock_movements")
+}
