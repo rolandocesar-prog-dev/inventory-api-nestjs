@@ -17,14 +17,17 @@ services:
       timeout: 3s
       retries: 10
 
-  # Aplica las migraciones pendientes y termina. Usa la etapa `build` (tiene la CLI de Prisma).
+  # Aplica las migraciones pendientes, crea o actualiza el admin (si se definió) y termina.
+  # Usa la etapa `build`, que tiene la CLI de Prisma y el código compilado.
   migrate:
     build:
       context: .
       target: build
-    command: ['npx', 'prisma', 'migrate', 'deploy']
+    command: ['sh', '-c', 'npx prisma migrate deploy && node dist/seed.js']
     environment:
       PRISMA_HIDE_UPDATE_MESSAGE: 'true'
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       DATABASE_URL: postgresql://${POSTGRES_USER:-inventory}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-inventory}
     depends_on:
       db:
