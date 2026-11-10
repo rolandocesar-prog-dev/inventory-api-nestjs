@@ -19,6 +19,7 @@ describe('X-Request-ID (e2e)', () => {
 
     expect(a.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/);
     expect(a.headers['x-request-id']).not.toBe(b.headers['x-request-id']);
+    expect(a.headers).not.toHaveProperty('x-powered-by');
   });
 
   it('reutiliza el id recibido y lo incluye en los errores', async () => {
