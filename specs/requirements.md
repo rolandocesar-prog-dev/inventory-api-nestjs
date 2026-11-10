@@ -82,9 +82,12 @@ Criterios de aceptación en formato EARS.
 
 ### RF-04 · Alertas y reportes
 
-- La API DEBE listar los productos con stock igual o menor a su stock mínimo.
+- La API DEBE listar los productos activos con stock igual o menor a su stock mínimo, los más
+  urgentes primero (`GET /api/v1/reports/low-stock`).
 - La API DEBE devolver el kardex (historial de movimientos) de un producto entre dos fechas.
-- La API DEBE devolver el valor total del inventario.
+- La API DEBE devolver el valor total del inventario activo (precio × stock), con el detalle por
+  categoría (`GET /api/v1/reports/inventory-value`).
+- Solo un admin DEBE poder consultar los reportes.
 
 ### RF-05 · Operación
 

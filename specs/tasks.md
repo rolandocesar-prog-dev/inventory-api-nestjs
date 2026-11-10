@@ -43,7 +43,8 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 ## M5 · Reportes y entrega (RF-04, RNF)
 
 - [ ] Alertas de stock mínimo y valorización del inventario.
-- [ ] Errores en formato RFC 9457 y logs estructurados.
+- [ ] Errores en formato RFC 9457.
+- [ ] Logs estructurados con `X-Request-ID` y sin datos sensibles (RNF-06).
 - [ ] Despliegue público (la API y `/docs`).
 - [ ] README final con diagrama y ejemplos; colección de peticiones (`.http` o Bruno).
 - [ ] Agregar el proyecto, con enlaces, a la sección Proyectos del CV.

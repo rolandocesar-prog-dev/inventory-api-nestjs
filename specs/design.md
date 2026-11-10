@@ -185,6 +185,15 @@ sentencia, dos salidas simultáneas no pueden dejar el stock negativo. Además s
 - **Kardex**: ordenado por fecha ascendente (y por id para desempatar), con `from` y `to`
   inclusivos y paginado como el catálogo. Cada movimiento incluye el correo de quien lo hizo.
 
+### Reportes (RF-04)
+
+- **Stock bajo**: `stock <= minStock` comparando columnas con `prisma.product.fields.minStock`;
+  orden por faltante (`minStock - stock`) descendente y después por nombre. Devuelve también
+  `missing` (unidades que faltan para llegar al mínimo).
+- **Valorización**: una consulta SQL con `SUM(price * stock)` agrupada por categoría (en
+  `numeric`, sin pasar por números de punto flotante); los importes salen como texto con 2
+  decimales, igual que el precio.
+
 ## 4. Errores
 
 Formato uniforme (RFC 9457, _problem details_):
@@ -198,6 +207,24 @@ Formato uniforme (RFC 9457, _problem details_):
   "instance": "/api/v1/stock/out"
 }
 ```
+
+- Un filtro global (`ProblemDetailsFilter`) convierte toda excepción en este formato con
+  `Content-Type: application/problem+json`. `title` es el nombre del estado en español,
+  `detail` el mensaje de la excepción y, en los errores de validación (400), `errors` trae la
+  lista de mensajes del `ValidationPipe`. Cada respuesta incluye `requestId`.
+- Un error no previsto responde 500 con un `detail` genérico (nunca la traza ni el mensaje
+  interno) y se registra completo en el log.
+- `/health` conserva el formato de terminus (`status`, `info`, `error`), que es el que leen
+  Docker y los monitores.
+
+## 4.1 Logs (RNF-06)
+
+- `nestjs-pino`: una línea JSON por petición con método, ruta, estado, duración y `requestId`.
+- `X-Request-ID`: se acepta el de la petición si es un id razonable (≤ 64 caracteres
+  `[A-Za-z0-9-_]`) o se genera un UUID; se devuelve siempre en la respuesta.
+- Se ocultan `authorization`, `cookie` y cualquier campo `password`, `refreshToken` o
+  `accessToken`; el cuerpo de las peticiones no se registra.
+- `LOG_LEVEL` (por defecto `info`; las pruebas usan `silent`).
 
 ## 5. Estrategia de pruebas
 
