@@ -84,7 +84,7 @@ model StockMovement {
   userId     String
   user       User         @relation(fields: [userId], references: [id])
   type       MovementType
-  quantity   Int          // positivo; el signo lo define el tipo
+  quantity   Int          // con signo: IN > 0, OUT < 0, ADJUSTMENT ≠ 0
   stockAfter Int
   reason     String?
   createdAt  DateTime     @default(now())
@@ -162,6 +162,28 @@ sentencia, dos salidas simultáneas no pueden dejar el stock negativo. Además s
   (`"45.50"`), para no perder precisión con `Decimal`.
 - **Categoría con nombre único sin distinguir mayúsculas**: columna `name_key` (nombre en
   minúsculas y sin espacios de más) con índice único; el servicio la calcula al crear o renombrar.
+
+### Movimientos de stock (RF-03)
+
+| Método y ruta                 | Rol   | Cuerpo / consulta                                   |
+| ----------------------------- | ----- | --------------------------------------------------- |
+| `POST /stock/in`              | todos | `productId`, `quantity` (> 0), `reason?`            |
+| `POST /stock/out`             | todos | `productId`, `quantity` (> 0), `reason?`            |
+| `POST /stock/adjustments`     | admin | `productId`, `countedStock` (≥ 0), `reason`         |
+| `GET /products/:id/movements` | todos | Kardex: `from`, `to` (ISO 8601), `page`, `pageSize` |
+
+- **Cantidad con signo**: `quantity` guarda el cambio real (entrada +, salida −, ajuste ±), así
+  la suma de los movimientos es el stock y el kardex se lee directo. La migración cambia el
+  `CHECK (quantity > 0)` por uno que exige el signo correcto según el tipo.
+- **Entrada**: `UPDATE products SET stock = stock + $q WHERE id = $id AND active RETURNING stock`.
+- **Salida**: la sentencia condicional de arriba (también exige `active`).
+- **Ajuste**: `SELECT … FOR UPDATE` bloquea la fila, se calcula la diferencia con el stock contado
+  y se actualiza; si la diferencia es 0, 422.
+- Si la sentencia no afecta filas, se consulta el producto para responder 404 (no existe),
+  422 (desactivado) o 422 (stock insuficiente). El movimiento se inserta en la misma
+  transacción, con `stockAfter` tomado del `RETURNING`.
+- **Kardex**: ordenado por fecha ascendente (y por id para desempatar), con `from` y `to`
+  inclusivos y paginado como el catálogo. Cada movimiento incluye el correo de quien lo hizo.
 
 ## 4. Errores
 

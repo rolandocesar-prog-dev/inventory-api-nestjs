@@ -68,11 +68,17 @@ Criterios de aceptación en formato EARS.
 ### RF-03 · Movimientos de stock
 
 - CUANDO se registra una entrada, salida o ajuste, la API DEBE actualizar el stock y guardar el
-  movimiento (usuario, cantidad, motivo, fecha) en una **misma transacción**.
+  movimiento (usuario, cantidad, motivo, fecha y stock resultante) en una **misma transacción**.
+- Entradas y salidas las DEBEN poder registrar el admin y el operador; los ajustes (conteo
+  físico, con motivo obligatorio), solo el admin.
+- Un ajuste indica el stock contado; la API DEBE registrar la diferencia. SI no hay diferencia,
+  DEBE responder 422.
 - SI una salida dejaría el stock en negativo, la API DEBE rechazarla con 422 y no modificar nada.
+- SI el producto no existe, la API DEBE responder 404; SI está desactivado, 422.
 - MIENTRAS dos operadores registran salidas del mismo producto al mismo tiempo, el stock final
   DEBE ser correcto (sin condiciones de carrera).
-- Los movimientos NO DEBEN editarse ni borrarse; una corrección se registra como ajuste.
+- Los movimientos NO DEBEN editarse ni borrarse; una corrección se registra como ajuste. La suma
+  de los movimientos de un producto DEBE ser igual a su stock.
 
 ### RF-04 · Alertas y reportes
 
