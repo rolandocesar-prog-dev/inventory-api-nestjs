@@ -20,6 +20,15 @@ export default defineConfig({
         'src/**/*.module.ts',
         'src/**/*.spec.ts',
       ],
+      // RNF-04: cobertura ≥ 80 % en los servicios (las reglas de negocio).
+      thresholds: {
+        'src/**/*.service.ts': {
+          lines: 80,
+          functions: 80,
+          branches: 80,
+          statements: 80,
+        },
+      },
     },
   },
 });
