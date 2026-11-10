@@ -1,6 +1,6 @@
 {
   "name": "inventory-api-nestjs",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "API REST de inventario para pequeños comercios: productos, stock y movimientos, con NestJS, PostgreSQL y Docker.",
   "author": "Rolando César Vásquez Tavera",
   "private": true,

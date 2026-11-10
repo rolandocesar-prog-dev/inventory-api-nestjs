@@ -1,0 +1,143 @@
+# Colección de peticiones de la API de inventario.
+# Se usa con REST Client (VS Code) o con el cliente HTTP de los IDE de JetBrains.
+# Antes: `docker compose up --build` y ADMIN_EMAIL / ADMIN_PASSWORD en .env.
+
+@baseUrl = http://localhost:3000
+@api = {{baseUrl}}/api/v1
+@adminEmail = admin@inventario.test
+@adminPassword = cambia-esta-clave-de-admin
+
+### Salud de la API y de la base de datos
+GET {{baseUrl}}/health
+
+### Login del admin (guarda los tokens para las siguientes peticiones)
+# @name login
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+###
+@token = {{login.response.body.accessToken}}
+@refreshToken = {{login.response.body.refreshToken}}
+
+### Usuario autenticado
+GET {{api}}/auth/me
+Authorization: Bearer {{token}}
+
+### Renovar los tokens (el token usado deja de servir)
+POST {{api}}/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### Crear un operador
+POST {{api}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "email": "operador@inventario.test",
+  "password": "clave-del-operador",
+  "role": "OPERATOR"
+}
+
+### Listar usuarios
+GET {{api}}/users
+Authorization: Bearer {{token}}
+
+### Crear una categoría
+# @name category
+POST {{api}}/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Herramientas" }
+
+###
+@categoryId = {{category.response.body.id}}
+
+### Listar categorías
+GET {{api}}/categories
+Authorization: Bearer {{token}}
+
+### Crear un producto (empieza con stock 0)
+# @name product
+POST {{api}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "sku": "MART-001",
+  "name": "Martillo de carpintero 16 oz",
+  "categoryId": "{{categoryId}}",
+  "price": 45.5,
+  "minStock": 5
+}
+
+###
+@productId = {{product.response.body.id}}
+
+### Listado paginado con búsqueda y filtro
+GET {{api}}/products?search=mart&categoryId={{categoryId}}&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### Actualizar el precio
+PATCH {{api}}/products/{{productId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "price": 48.9 }
+
+### Entrada de stock
+POST {{api}}/stock/in
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": "{{productId}}", "quantity": 10, "reason": "Compra a proveedor" }
+
+### Salida de stock
+POST {{api}}/stock/out
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": "{{productId}}", "quantity": 7, "reason": "Venta mostrador" }
+
+### Salida mayor al stock: 422 en formato RFC 9457, sin cambiar nada
+POST {{api}}/stock/out
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": "{{productId}}", "quantity": 100 }
+
+### Ajuste por conteo físico (solo admin)
+POST {{api}}/stock/adjustments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": "{{productId}}", "countedStock": 2, "reason": "Conteo mensual: 1 dañado" }
+
+### Kardex del producto entre dos fechas
+GET {{api}}/products/{{productId}}/movements?from=2026-01-01&to=2026-12-31
+Authorization: Bearer {{token}}
+
+### Productos con stock bajo
+GET {{api}}/reports/low-stock
+Authorization: Bearer {{token}}
+
+### Valor del inventario por categoría
+GET {{api}}/reports/inventory-value
+Authorization: Bearer {{token}}
+
+### Desactivar el producto (no se borra)
+DELETE {{api}}/products/{{productId}}
+Authorization: Bearer {{token}}
+
+### Cerrar sesión
+POST {{api}}/auth/logout
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }

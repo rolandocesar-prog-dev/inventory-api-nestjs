@@ -31,7 +31,7 @@ export function setupApp(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('Inventory API')
     .setDescription('API de inventario para pequeños comercios')
-    .setVersion('0.1.0')
+    .setVersion('1.0.0')
     .addBearerAuth()
     .build();
   SwaggerModule.setup('docs', app, () =>
