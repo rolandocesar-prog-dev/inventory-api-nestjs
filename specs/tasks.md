@@ -37,7 +37,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 
 - [x] Cantidad con signo en los movimientos (migración de las restricciones).
 - [x] Entradas, salidas y ajustes en transacción; 422 si el stock quedaría negativo.
-- [ ] Prueba de concurrencia: 20 salidas simultáneas.
+- [x] Prueba de concurrencia: 20 salidas simultáneas.
 - [ ] Kardex por producto y rango de fechas.
 
 ## M5 · Reportes y entrega (RF-04, RNF)
