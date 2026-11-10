@@ -6,6 +6,8 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,
+    // Igual que en main.ts (vía @nestjs/core): los decoradores necesitan los metadatos.
+    setupFiles: ['reflect-metadata'],
     root: './',
     include: ['**/*.spec.ts'],
     coverage: {

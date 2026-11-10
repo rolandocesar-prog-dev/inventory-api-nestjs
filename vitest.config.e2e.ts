@@ -18,6 +18,8 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,
+    // Igual que en main.ts (vía @nestjs/core): los decoradores necesitan los metadatos.
+    setupFiles: ['reflect-metadata'],
     root: './',
     include: ['**/*.e2e-spec.ts'],
     // Las pruebas e2e nunca tocan la base de desarrollo.

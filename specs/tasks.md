@@ -16,7 +16,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 - [x] `PrismaService` con cierre ordenado.
 - [x] `/health` con @nestjs/terminus verificando la base de datos (RF-05).
 - [x] PostgreSQL como servicio en el job de CI para las pruebas e2e.
-- [ ] Validación global de variables de entorno al iniciar.
+- [x] Validación global de variables de entorno al iniciar.
 
 ## M2 · Autenticación (RF-01)
 
