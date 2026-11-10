@@ -44,7 +44,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 
 - [x] Alertas de stock mínimo y valorización del inventario.
 - [x] Errores en formato RFC 9457.
-- [ ] Logs estructurados con `X-Request-ID` y sin datos sensibles (RNF-06).
+- [x] Logs estructurados con `X-Request-ID` y sin datos sensibles (RNF-06).
 - [ ] Despliegue público (la API y `/docs`).
 - [ ] README final con diagrama y ejemplos; colección de peticiones (`.http` o Bruno).
 - [ ] Agregar el proyecto, con enlaces, a la sección Proyectos del CV.

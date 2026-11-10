@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 import { ProblemDetailsFilter } from './common/problem-details.filter.js';
 
 export const API_PREFIX = 'api/v1';
@@ -9,6 +10,8 @@ export const API_PREFIX = 'api/v1';
  * levanten la aplicación exactamente igual.
  */
 export function setupApp(app: INestApplication): void {
+  // Todos los logs (también los de Nest) salen en JSON por pino (RNF-06).
+  app.useLogger(app.get(Logger));
   app.setGlobalPrefix(API_PREFIX, { exclude: ['health'] });
   app.enableShutdownHooks();
   // Rechaza campos desconocidos y convierte tipos según los DTO (RNF-01).

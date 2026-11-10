@@ -1,6 +1,7 @@
 import { plainToInstance } from 'class-transformer';
 import {
   IsEnum,
+  IsIn,
   IsInt,
   IsString,
   IsUrl,
@@ -43,6 +44,10 @@ export class EnvironmentVariables {
   @IsInt()
   @Min(1)
   LOGIN_THROTTLE_LIMIT: number = 5;
+
+  /** Nivel de los logs JSON (RNF-06). */
+  @IsIn(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+  LOG_LEVEL: string = 'info';
 }
 
 /**

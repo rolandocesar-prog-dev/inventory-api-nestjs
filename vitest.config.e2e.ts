@@ -29,6 +29,7 @@ export default defineConfig({
       DATABASE_URL: testDatabaseUrl,
       NODE_ENV: 'test',
       LOGIN_THROTTLE_LIMIT: '1000',
+      LOG_LEVEL: 'silent',
     },
     globalSetup: ['./test/global-setup.ts'],
     // Los archivos comparten la base de pruebas: se ejecutan en serie.
