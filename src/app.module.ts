@@ -5,6 +5,7 @@ import { CatalogModule } from './catalog/catalog.module.js';
 import { validateEnv } from './config/env.validation.js';
 import { HealthModule } from './health/health.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 import { StockModule } from './stock/stock.module.js';
 
 @Module({
@@ -15,6 +16,7 @@ import { StockModule } from './stock/stock.module.js';
     AuthModule,
     CatalogModule,
     StockModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}
