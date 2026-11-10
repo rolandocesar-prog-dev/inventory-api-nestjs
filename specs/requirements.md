@@ -53,10 +53,17 @@ Criterios de aceptación en formato EARS.
 
 - La API DEBE permitir crear, consultar, actualizar y desactivar productos (SKU único, nombre,
   categoría, precio, stock mínimo) y categorías.
+- Solo un admin DEBE poder modificar el catálogo; un operador solo lo consulta (403 si intenta
+  cambiarlo).
 - CUANDO se lista el catálogo, la API DEBE permitir paginación, búsqueda por nombre o SKU y filtro
-  por categoría.
-- SI se intenta crear un producto con un SKU existente, la API DEBE responder 409.
-- Un producto con movimientos NO DEBE eliminarse físicamente; solo desactivarse.
+  por categoría, y devolver el total de resultados.
+- SI se intenta crear un producto con un SKU existente o una categoría con un nombre existente,
+  la API DEBE responder 409. El SKU no distingue mayúsculas.
+- SI la categoría indicada para un producto no existe, la API DEBE responder 422.
+- El stock de un producto NO DEBE cambiarse desde el catálogo: empieza en 0 y solo cambia con
+  movimientos (RF-03).
+- Un producto con movimientos NO DEBE eliminarse físicamente; `DELETE` solo lo desactiva, y los
+  productos inactivos no aparecen en el listado salvo que se pidan.
 
 ### RF-03 · Movimientos de stock
 

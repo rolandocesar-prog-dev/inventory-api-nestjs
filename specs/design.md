@@ -141,6 +141,28 @@ sentencia, dos salidas simultáneas no pueden dejar el stock negativo. Además s
 - **Semilla**: `npm run seed` (y el servicio `migrate` de Docker) crea o actualiza el admin con
   `ADMIN_EMAIL` y `ADMIN_PASSWORD`; si faltan, no hace nada.
 
+### Catálogo (RF-02)
+
+| Método y ruta           | Rol   | Notas                                                                  |
+| ----------------------- | ----- | ---------------------------------------------------------------------- |
+| `GET /categories`       | todos | Ordenadas por nombre.                                                  |
+| `POST /categories`      | admin | 409 si el nombre existe (sin distinguir mayúsculas).                   |
+| `PATCH /categories/:id` | admin | Renombrar.                                                             |
+| `GET /products`         | todos | `page`, `pageSize` (≤ 100), `search`, `categoryId`, `includeInactive`. |
+| `GET /products/:id`     | todos | 404 si no existe.                                                      |
+| `POST /products`        | admin | Stock inicial 0. 409 por SKU, 422 si la categoría no existe.           |
+| `PATCH /products/:id`   | admin | Sin `stock`: el `ValidationPipe` rechaza el campo (400).               |
+| `DELETE /products/:id`  | admin | Desactiva (`active = false`) y responde 204.                           |
+
+- **Listado paginado**: `{ data: [...], meta: { page, pageSize, total, totalPages } }`, con
+  `findMany` y `count` en una misma transacción para que el total sea coherente.
+- **Búsqueda**: `contains` sin distinguir mayúsculas sobre nombre y SKU.
+- **SKU**: se guarda en mayúsculas y sin espacios; formato `^[A-Z0-9-]{3,32}$`.
+- **Precio**: entra como número con hasta 2 decimales (≥ 0) y sale como texto con 2 decimales
+  (`"45.50"`), para no perder precisión con `Decimal`.
+- **Categoría con nombre único sin distinguir mayúsculas**: columna `name_key` (nombre en
+  minúsculas y sin espacios de más) con índice único; el servicio la calcula al crear o renombrar.
+
 ## 4. Errores
 
 Formato uniforme (RFC 9457, _problem details_):
