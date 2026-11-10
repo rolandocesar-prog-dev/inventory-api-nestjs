@@ -30,10 +30,21 @@ Criterios de aceptación en formato EARS.
 ### RF-01 · Autenticación y roles
 
 - CUANDO un usuario envía credenciales válidas a `POST /api/v1/auth/login`, la API DEBE devolver
-  un token de acceso (15 min) y uno de renovación.
-- SI el token falta, es inválido o expiró, la API DEBE responder 401.
+  un token de acceso (15 min) y uno de renovación (7 días).
+- SI el correo no existe, la contraseña no coincide o el usuario está desactivado, la API DEBE
+  responder 401 con el mismo mensaje genérico (sin revelar cuál de las tres falló).
+- CUANDO se envía un token de renovación válido a `POST /api/v1/auth/refresh`, la API DEBE
+  devolver un par nuevo e invalidar el token usado (rotación).
+- SI se presenta un token de renovación ya usado o revocado, la API DEBE responder 401 y revocar
+  todas las sesiones de ese usuario (posible robo del token).
+- CUANDO se llama a `POST /api/v1/auth/logout` con un token de renovación, la API DEBE revocarlo.
+- `GET /api/v1/auth/me` DEBE devolver el usuario autenticado (sin el hash de la contraseña).
+- SI el token de acceso falta, es inválido o expiró, la API DEBE responder 401.
 - SI el rol del usuario no permite la operación, la API DEBE responder 403.
-- Las contraseñas DEBEN guardarse con un hash lento (argon2 o bcrypt), nunca en texto plano.
+- Solo un admin DEBE poder crear, listar, cambiar el rol y desactivar usuarios
+  (`/api/v1/users`); SI el correo ya existe, la API DEBE responder 409.
+- Las contraseñas DEBEN guardarse con un hash lento (argon2 o bcrypt), nunca en texto plano, y
+  tener al menos 10 caracteres.
 
 ### RF-02 · Catálogo
 
@@ -75,7 +86,7 @@ Criterios de aceptación en formato EARS.
 | ID     | Requisito                                                                  |
 | ------ | -------------------------------------------------------------------------- |
 | RNF-01 | Validación de todas las entradas; errores con formato uniforme (RFC 9457). |
-| RNF-02 | Límite de peticiones en `auth/login` para frenar ataques de fuerza bruta.  |
+| RNF-02 | Límite de peticiones en `auth/login` (5 por minuto por IP; luego 429).     |
 | RNF-03 | `docker compose up` levanta la API y la base de datos con un solo comando. |
 | RNF-04 | Cobertura ≥ 80 % en servicios; pruebas e2e contra PostgreSQL real en CI.   |
 | RNF-05 | Imagen Docker multi-etapa, sin usuario root y con _healthcheck_.           |

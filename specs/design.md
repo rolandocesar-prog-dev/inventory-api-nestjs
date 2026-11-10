@@ -32,7 +32,9 @@ Rutas de negocio bajo `/api/v1`; `/health` y `/docs` fuera del prefijo.
 | Acceso a datos | Prisma 7 + `@prisma/adapter-pg`  | Esquema tipado, migraciones versionadas, driver `pg`.      |
 | Salud          | @nestjs/terminus                 | Chequeos estándar con 503 cuando falla una dependencia.    |
 | Validación     | class-validator + ValidationPipe | Integrado con Nest y con Swagger.                          |
-| Autenticación  | @nestjs/jwt + passport-jwt       | Estándar del ecosistema.                                   |
+| Autenticación  | @nestjs/jwt + guard propio       | Estándar del ecosistema; sin Passport (no hace falta).     |
+| Contraseñas    | argon2 (argon2id)                | Hash lento recomendado por OWASP.                          |
+| Límite de uso  | @nestjs/throttler                | Límite por IP en el login (RNF-02).                        |
 | Pruebas        | Vitest + Supertest               | Lo que genera Nest 12; rápido y compatible con ESM.        |
 | Lint / formato | oxlint + Prettier                | Lo que genera Nest 12; lint con información de tipos.      |
 
@@ -90,6 +92,18 @@ model StockMovement {
   @@index([productId, createdAt])
 }
 
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    // SHA-256 del secreto; el secreto nunca se guarda
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
 enum Role { ADMIN OPERATOR }
 enum MovementType { IN OUT ADJUSTMENT }
 ```
@@ -107,6 +121,25 @@ RETURNING stock;
 Si no afecta ninguna fila, se responde 422. Como la condición y la resta ocurren en la misma
 sentencia, dos salidas simultáneas no pueden dejar el stock negativo. Además se agrega
 `CHECK (stock >= 0)` en la migración, como última defensa.
+
+### Autenticación (RF-01)
+
+- **Token de acceso**: JWT HS256 firmado con `JWT_SECRET` (≥ 32 caracteres), 15 min, con
+  `sub` (id del usuario) y `role`. Va en `Authorization: Bearer …`.
+- **Token de renovación**: opaco, con la forma `<id>.<secreto>` (secreto de 32 bytes aleatorios
+  en base64url). En la base solo se guarda el SHA-256 del secreto (`refresh_tokens`), así que una
+  copia de la base no permite iniciar sesión. Dura 7 días.
+- **Rotación**: `POST /auth/refresh` marca el token como revocado y emite un par nuevo en la misma
+  transacción. Si llega un token ya revocado, se revocan todos los del usuario (detección de
+  reutilización) y se responde 401.
+- **Guards globales**: `JwtAuthGuard` exige token en todas las rutas salvo las marcadas con
+  `@Public()` (`/health`, `/docs`, `auth/login`, `auth/refresh`, `auth/logout`); además comprueba
+  que el usuario siga activo. `RolesGuard` lee `@Roles(Role.ADMIN)` y responde 403.
+- **Fuerza bruta**: `@nestjs/throttler` con 5 intentos por minuto por IP solo en `auth/login`.
+  Para comparar la contraseña aunque el correo no exista se verifica contra un hash ficticio, así
+  el tiempo de respuesta no revela qué correos existen.
+- **Semilla**: `npm run seed` (y el servicio `migrate` de Docker) crea o actualiza el admin con
+  `ADMIN_EMAIL` y `ADMIN_PASSWORD`; si faltan, no hace nada.
 
 ## 4. Errores
 
@@ -139,7 +172,7 @@ como contenedor de servicio del job.
 
 - **Variables de entorno** validadas al iniciar con `class-validator` en `ConfigModule.validate`
   (`src/config/env.validation.ts`). Si algo falla, el proceso termina con la lista de variables
-  inválidas, sin imprimir sus valores. Hoy: `NODE_ENV`, `PORT` y `DATABASE_URL`.
+  inválidas, sin imprimir sus valores: `NODE_ENV`, `PORT`, `DATABASE_URL` y `JWT_SECRET`.
 - **`PrismaService`** extiende el cliente generado, conecta en `onModuleInit` y desconecta en
   `onModuleDestroy`; `enableShutdownHooks()` hace que SIGTERM dispare ese cierre.
 - **`GET /health`** usa terminus: `PrismaHealthIndicator.pingCheck` (`SELECT 1`, 1,5 s de
