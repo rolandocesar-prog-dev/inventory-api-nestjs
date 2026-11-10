@@ -5,6 +5,7 @@ import {
   HealthCheckService,
   PrismaHealthIndicator,
 } from '@nestjs/terminus';
+import { Public } from '../auth/decorators.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /** Tiempo máximo para que la base responda al `SELECT 1` del chequeo. */
@@ -15,6 +16,7 @@ export const DATABASE_PING_TIMEOUT_MS = 1500;
  * y el monitoreo. Responde 503 si alguna dependencia falla.
  */
 @ApiTags('health')
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(
