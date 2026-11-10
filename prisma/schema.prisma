@@ -85,7 +85,7 @@ model StockMovement {
   userId     String       @map("user_id") @db.Uuid
   user       User         @relation(fields: [userId], references: [id], onDelete: Restrict)
   type       MovementType
-  /// Siempre positiva; el signo lo define el tipo.
+  /// Con signo: entrada > 0, salida < 0, ajuste distinto de 0 (CHECK en la migración).
   quantity   Int
   stockAfter Int          @map("stock_after")
   reason     String?

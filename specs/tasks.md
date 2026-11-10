@@ -35,7 +35,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 
 ## M4 · Stock (RF-03)
 
-- [ ] Cantidad con signo en los movimientos (migración de las restricciones).
+- [x] Cantidad con signo en los movimientos (migración de las restricciones).
 - [ ] Entradas, salidas y ajustes en transacción; 422 si el stock quedaría negativo.
 - [ ] Prueba de concurrencia: 20 salidas simultáneas.
 - [ ] Kardex por producto y rango de fechas.

@@ -57,4 +57,44 @@ describe('Base de datos (e2e)', () => {
       }),
     ).rejects.toThrow(/products_stock_non_negative/);
   });
+
+  it('el CHECK exige el signo de la cantidad según el tipo de movimiento', async () => {
+    const category = await prisma.category.create({
+      data: { name: 'Pinturas', nameKey: 'pinturas' },
+    });
+    const product = await prisma.product.create({
+      data: {
+        sku: 'PINT-001',
+        name: 'Pintura',
+        categoryId: category.id,
+        price: '10',
+      },
+    });
+    const user = await prisma.user.create({
+      data: { email: 'a@b.test', passwordHash: 'x' },
+    });
+    const movement = (type: 'IN' | 'OUT' | 'ADJUSTMENT', quantity: number) =>
+      prisma.stockMovement.create({
+        data: {
+          productId: product.id,
+          userId: user.id,
+          type,
+          quantity,
+          stockAfter: 5,
+        },
+      });
+
+    await expect(movement('IN', 5)).resolves.toBeDefined();
+    await expect(movement('OUT', -1)).resolves.toBeDefined();
+    await expect(movement('ADJUSTMENT', -2)).resolves.toBeDefined();
+    for (const [type, quantity] of [
+      ['IN', -1],
+      ['OUT', 1],
+      ['ADJUSTMENT', 0],
+    ] as const) {
+      await expect(movement(type, quantity)).rejects.toThrow(
+        /stock_movements_quantity_sign/,
+      );
+    }
+  });
 });
