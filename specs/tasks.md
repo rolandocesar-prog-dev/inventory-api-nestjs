@@ -13,7 +13,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 ## M1 · Datos
 
 - [x] Prisma: esquema del diseño, primera migración y `CHECK (stock >= 0)`.
-- [ ] `PrismaService` con cierre ordenado.
+- [x] `PrismaService` con cierre ordenado.
 - [ ] `/health` con @nestjs/terminus verificando la base de datos (RF-05).
 - [ ] PostgreSQL como servicio en el job de CI para las pruebas e2e.
 - [ ] Validación global de variables de entorno al iniciar.
