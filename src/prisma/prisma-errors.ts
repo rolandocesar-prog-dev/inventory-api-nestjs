@@ -15,3 +15,11 @@ export function isNotFound(error: unknown): boolean {
     error.code === 'P2025'
   );
 }
+
+/** Una clave foránea apunta a un registro que no existe (código P2003). */
+export function isForeignKeyViolation(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2003'
+  );
+}
