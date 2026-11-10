@@ -172,7 +172,9 @@ como contenedor de servicio del job.
 
 - **Variables de entorno** validadas al iniciar con `class-validator` en `ConfigModule.validate`
   (`src/config/env.validation.ts`). Si algo falla, el proceso termina con la lista de variables
-  inválidas, sin imprimir sus valores: `NODE_ENV`, `PORT`, `DATABASE_URL` y `JWT_SECRET`.
+  inválidas, sin imprimir sus valores: `NODE_ENV`, `PORT`, `DATABASE_URL`, `JWT_SECRET` y
+  `LOGIN_THROTTLE_LIMIT` (intentos de login por minuto e IP; 5 por defecto, las pruebas e2e lo
+  suben para no chocar con él salvo en la prueba del límite).
 - **`PrismaService`** extiende el cliente generado, conecta en `onModuleInit` y desconecta en
   `onModuleDestroy`; `enableShutdownHooks()` hace que SIGTERM dispare ese cierre.
 - **`GET /health`** usa terminus: `PrismaHealthIndicator.pingCheck` (`SELECT 1`, 1,5 s de

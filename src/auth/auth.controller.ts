@@ -5,12 +5,15 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import {
   ApiBearerAuth,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { LoginDto, RefreshTokenDto, TokenPairResponse } from './auth.dto.js';
@@ -25,8 +28,10 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Public()
+  @UseGuards(ThrottlerGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiTooManyRequestsResponse({ description: 'Más de 5 intentos por minuto' })
   @ApiOkResponse({ type: TokenPairResponse })
   @ApiUnauthorizedResponse({ description: 'Credenciales inválidas' })
   login(@Body() dto: LoginDto): Promise<TokenPair> {

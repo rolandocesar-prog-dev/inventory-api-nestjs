@@ -38,6 +38,11 @@ export class EnvironmentVariables {
   @IsString()
   @MinLength(32)
   JWT_SECRET!: string;
+
+  /** Intentos de login por minuto y por IP (RNF-02). */
+  @IsInt()
+  @Min(1)
+  LOGIN_THROTTLE_LIMIT: number = 5;
 }
 
 /**

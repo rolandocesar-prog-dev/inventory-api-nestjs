@@ -24,7 +24,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 - [x] Login, token de acceso y de renovación, con rotación, detección de reutilización y logout.
 - [x] Guards de JWT y de roles; `GET /auth/me`; pruebas e2e de 401 y 403.
 - [x] Gestión de usuarios para el admin (`/users`: crear, listar, cambiar rol, desactivar).
-- [ ] Límite de peticiones en el login (RNF-02).
+- [x] Límite de peticiones en el login (RNF-02).
 - [ ] Script de semilla con un usuario admin.
 
 ## M3 · Catálogo (RF-02)

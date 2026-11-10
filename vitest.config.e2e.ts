@@ -23,7 +23,13 @@ export default defineConfig({
     root: './',
     include: ['**/*.e2e-spec.ts'],
     // Las pruebas e2e nunca tocan la base de desarrollo.
-    env: { DATABASE_URL: testDatabaseUrl, NODE_ENV: 'test' },
+    // El límite del login se sube para que las pruebas no choquen con él;
+    // test/login-throttle.e2e-spec.ts lo baja para probarlo.
+    env: {
+      DATABASE_URL: testDatabaseUrl,
+      NODE_ENV: 'test',
+      LOGIN_THROTTLE_LIMIT: '1000',
+    },
     globalSetup: ['./test/global-setup.ts'],
     // Los archivos comparten la base de pruebas: se ejecutan en serie.
     fileParallelism: false,
