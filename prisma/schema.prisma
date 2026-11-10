@@ -51,7 +51,9 @@ model RefreshToken {
 
 model Category {
   id       String    @id @default(uuid()) @db.Uuid
-  name     String    @unique
+  name     String
+  /// Nombre en minúsculas: único sin distinguir mayúsculas (specs/design.md, Catálogo).
+  nameKey  String    @unique @map("name_key")
   products Product[]
 
   @@map("categories")

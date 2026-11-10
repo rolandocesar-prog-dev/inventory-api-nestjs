@@ -25,7 +25,7 @@ describe('Base de datos (e2e)', () => {
 
   it('las migraciones crean el esquema y se puede guardar un producto', async () => {
     const category = await prisma.category.create({
-      data: { name: 'Herramientas' },
+      data: { name: 'Herramientas', nameKey: 'herramientas' },
     });
     const product = await prisma.product.create({
       data: {
@@ -42,7 +42,7 @@ describe('Base de datos (e2e)', () => {
 
   it('el CHECK de la base rechaza un stock negativo (RF-03, última defensa)', async () => {
     const category = await prisma.category.create({
-      data: { name: 'Pinturas' },
+      data: { name: 'Pinturas', nameKey: 'pinturas' },
     });
 
     await expect(
