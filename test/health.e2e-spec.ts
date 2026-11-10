@@ -22,12 +22,15 @@ describe('Health (e2e)', () => {
     await app.close();
   });
 
-  it('GET /health responde 200 con estado ok', async () => {
+  it('GET /health responde 200 con la base de datos arriba', async () => {
     const response = await request(app.getHttpServer())
       .get('/health')
       .expect(200);
 
-    expect(response.body).toMatchObject({ status: 'ok' });
+    expect(response.body).toMatchObject({
+      status: 'ok',
+      info: { database: { status: 'up' } },
+    });
   });
 
   it('GET /docs-json publica la especificación OpenAPI', async () => {

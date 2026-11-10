@@ -1,21 +1,36 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import {
+  HealthCheck,
+  HealthCheckService,
+  PrismaHealthIndicator,
+} from '@nestjs/terminus';
+import { PrismaService } from '../prisma/prisma.service.js';
 
-export class HealthResponse {
-  status!: 'ok';
-  uptimeSeconds!: number;
-}
+/** Tiempo máximo para que la base responda al `SELECT 1` del chequeo. */
+export const DATABASE_PING_TIMEOUT_MS = 1500;
 
 /**
- * Endpoint de salud para Docker, el despliegue y el monitoreo.
- * En el hito M1 se amplía con @nestjs/terminus para verificar la base de datos.
+ * Salud de la API y de la base de datos (RF-05), para Docker, el despliegue
+ * y el monitoreo. Responde 503 si alguna dependencia falla.
  */
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
+  constructor(
+    private readonly health: HealthCheckService,
+    private readonly db: PrismaHealthIndicator,
+    private readonly prisma: PrismaService,
+  ) {}
+
   @Get()
-  @ApiOkResponse({ type: HealthResponse })
-  check(): HealthResponse {
-    return { status: 'ok', uptimeSeconds: Math.round(process.uptime()) };
+  @HealthCheck()
+  check() {
+    return this.health.check([
+      () =>
+        this.db
+          .pingCheck('database', this.prisma)
+          .withTimeout(DATABASE_PING_TIMEOUT_MS),
+    ]);
   }
 }

@@ -24,6 +24,7 @@ services:
       target: build
     command: ['npx', 'prisma', 'migrate', 'deploy']
     environment:
+      PRISMA_HIDE_UPDATE_MESSAGE: 'true'
       DATABASE_URL: postgresql://${POSTGRES_USER:-inventory}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-inventory}
     depends_on:
       db:

@@ -8,5 +8,10 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.spec.ts'],
+    coverage: {
+      include: ['src/**/*.ts'],
+      // Código generado y de arranque; el arranque se cubre en las pruebas e2e.
+      exclude: ['src/generated/**', 'src/main.ts', 'src/**/*.spec.ts'],
+    },
   },
 });
