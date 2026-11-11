@@ -63,6 +63,27 @@ export class EnvironmentVariables {
   })
   @IsBoolean()
   TRUST_PROXY: boolean = false;
+
+  /** Orígenes web que pueden llamar a la API (CORS, RNF-09); vacío = sin CORS. */
+  @Transform(({ obj }: { obj: Record<string, unknown> }) => {
+    const raw = obj['CORS_ORIGINS'];
+    if (raw === undefined || raw === '') return [];
+    return typeof raw === 'string'
+      ? raw
+          .split(',')
+          .map((origin) => origin.trim().replace(/\/+$/, ''))
+          .filter(Boolean)
+      : raw;
+  })
+  @IsUrl(
+    {
+      protocols: ['http', 'https'],
+      require_protocol: true,
+      require_tld: false,
+    },
+    { each: true },
+  )
+  CORS_ORIGINS: string[] = [];
 }
 
 /**

@@ -39,6 +39,28 @@ describe('validateEnv', () => {
     );
   });
 
+  it('CORS_ORIGINS es una lista vacía por defecto y separa por comas', () => {
+    expect(validateEnv(valid).CORS_ORIGINS).toEqual([]);
+    expect(validateEnv({ ...valid, CORS_ORIGINS: '' }).CORS_ORIGINS).toEqual(
+      [],
+    );
+    expect(
+      validateEnv({
+        ...valid,
+        CORS_ORIGINS: ' http://localhost:8080/ , https://facturas.example.com',
+      }).CORS_ORIGINS,
+    ).toEqual(['http://localhost:8080', 'https://facturas.example.com']);
+  });
+
+  it('rechaza orígenes de CORS que no son http(s)', () => {
+    expect(() => validateEnv({ ...valid, CORS_ORIGINS: '*' })).toThrow(
+      /CORS_ORIGINS/,
+    );
+    expect(() =>
+      validateEnv({ ...valid, CORS_ORIGINS: 'ftp://archivos.example.com' }),
+    ).toThrow(/CORS_ORIGINS/);
+  });
+
   it('falla si falta DATABASE_URL', () => {
     expect(() => validateEnv({})).toThrow(/DATABASE_URL/);
   });

@@ -42,6 +42,8 @@ services:
       PORT: 3000
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
       DATABASE_URL: postgresql://${POSTGRES_USER:-inventory}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-inventory}
+      # Orígenes web permitidos (p. ej. la versión web del escáner de facturas).
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
     ports:
       - '127.0.0.1:3000:3000'
     depends_on:

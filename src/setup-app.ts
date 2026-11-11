@@ -25,6 +25,16 @@ export function setupApp(app: INestApplication): void {
   if (env.get('TRUST_PROXY', { infer: true })) {
     express.set('trust proxy', 1);
   }
+  // Solo los orígenes web configurados (RNF-09); sin cookies, la sesión va en Authorization.
+  const origins = env.get('CORS_ORIGINS', { infer: true });
+  if (origins.length > 0) {
+    app.enableCors({
+      origin: origins,
+      methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+      allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-ID'],
+      exposedHeaders: ['X-Request-ID', 'Retry-After-login'],
+    });
+  }
 
   app.setGlobalPrefix(API_PREFIX, { exclude: ['health'] });
   app.enableShutdownHooks();

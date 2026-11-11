@@ -152,6 +152,9 @@ Detrás del proxy de Render, `TRUST_PROXY=true` hace que el límite del login cu
 del cliente; comprobado en producción: el sexto intento responde 429 y falsificar
 `X-Forwarded-For` no lo evita.
 
+Para clientes web, `CORS_ORIGINS` lista los orígenes que pueden llamar a la API desde un navegador
+(separados por comas); si está vacío, el navegador bloquea las llamadas desde cualquier otro sitio.
+
 ## Cómo ejecutarlo
 
 Con Docker (base de datos, migraciones, admin inicial y API):
