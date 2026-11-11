@@ -112,16 +112,17 @@ Criterios de aceptación en formato EARS.
 
 ## 5. Requisitos no funcionales
 
-| ID     | Requisito                                                                  |
-| ------ | -------------------------------------------------------------------------- |
-| RNF-01 | Validación de todas las entradas; errores con formato uniforme (RFC 9457). |
-| RNF-02 | Límite de peticiones en `auth/login` (5 por minuto por IP; luego 429).     |
-| RNF-03 | `docker compose up` levanta la API y la base de datos con un solo comando. |
-| RNF-04 | Cobertura ≥ 80 % en servicios; pruebas e2e contra PostgreSQL real en CI.   |
-| RNF-05 | Imagen Docker multi-etapa, sin usuario root y con _healthcheck_.           |
-| RNF-06 | Logs estructurados con id de petición; sin datos sensibles en los logs.    |
-| RNF-07 | Despliegue público sin costo: planes gratuitos sin tarjeta de crédito.     |
-| RNF-08 | Detrás del proxy de la plataforma, el límite del login usa la IP real.     |
+| ID     | Requisito                                                                            |
+| ------ | ------------------------------------------------------------------------------------ |
+| RNF-01 | Validación de todas las entradas; errores con formato uniforme (RFC 9457).           |
+| RNF-02 | Límite de peticiones en `auth/login` (5 por minuto por IP; luego 429).               |
+| RNF-03 | `docker compose up` levanta la API y la base de datos con un solo comando.           |
+| RNF-04 | Cobertura ≥ 80 % en servicios; pruebas e2e contra PostgreSQL real en CI.             |
+| RNF-05 | Imagen Docker multi-etapa, sin usuario root y con _healthcheck_.                     |
+| RNF-06 | Logs estructurados con id de petición; sin datos sensibles en los logs.              |
+| RNF-07 | Despliegue público sin costo: planes gratuitos sin tarjeta de crédito.               |
+| RNF-08 | Detrás del proxy de la plataforma, el límite del login usa la IP real.               |
+| RNF-09 | Solo los orígenes web configurados pueden llamar a la API desde un navegador (CORS). |
 
 ## 6. Criterio de "terminado"
 

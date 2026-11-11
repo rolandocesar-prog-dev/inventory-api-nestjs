@@ -55,3 +55,7 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 - [x] Semilla del operador de demo y catálogo de ejemplo.
 - [x] Credenciales de demo en el workflow de producción y en el README; login verificado en vivo.
 - [x] Workflow manual para restablecer los datos de la demo, con confirmación.
+
+## M7 · Clientes web
+
+- [ ] CORS configurable con `CORS_ORIGINS` para la versión web del escáner de facturas.

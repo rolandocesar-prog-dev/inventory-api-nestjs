@@ -282,6 +282,12 @@ como contenedor de servicio del job.
   secretos `DATABASE_URL`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` del repositorio.
 - **`TRUST_PROXY`** (por defecto `false`): con `true`, Express confía en el primer proxy
   (`trust proxy = 1`) y el throttler limita por la IP real del cliente, no la del balanceador.
+- **`CORS_ORIGINS`** (por defecto vacío = sin CORS): lista de orígenes separados por comas que
+  pueden llamar a la API desde un navegador, p. ej. `http://localhost:8080` para la versión web
+  del [escáner de facturas](https://github.com/rolandocesar-prog-dev/invoice-scanner-flutter).
+  Solo esos orígenes reciben `Access-Control-Allow-Origin`; se exponen `X-Request-ID` y
+  `Retry-After-login`. La autenticación va por `Authorization` (sin cookies), así que no hace
+  falta `credentials`.
 - **Puerto**: Render define `PORT`; el _healthcheck_ de la imagen usa `${PORT:-3000}`.
 - **Arranque en frío**: la primera petición tras inactividad tarda (Render ≈ 1 min y Neon
   ≈ 1 s); el README lo avisa. Sin credenciales públicas: la demo en vivo es `/docs` y `/health`.
