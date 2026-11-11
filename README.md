@@ -9,8 +9,24 @@ operaciones simultáneas**.
 
 **En vivo:** [documentación interactiva](https://inventory-api-c5yi.onrender.com/docs) ·
 [estado](https://inventory-api-c5yi.onrender.com/health). Corre en planes gratuitos (Render +
-Neon): la primera visita tras un rato sin uso puede tardar cerca de un minuto en despertar. Las
-operaciones exigen una cuenta; para probarlas de punta a punta, usa Docker (abajo).
+Neon): la primera visita tras un rato sin uso puede tardar cerca de un minuto en despertar.
+
+### Pruébala en 1 minuto (cuenta de demostración)
+
+| Usuario                | Contraseña             | Rol                                                           |
+| ---------------------- | ---------------------- | ------------------------------------------------------------- |
+| `demo@inventario.test` | `demo-inventario-2026` | Operador: consulta el catálogo y registra entradas y salidas. |
+
+1. En [`/docs`](https://inventory-api-c5yi.onrender.com/docs), abre `POST /api/v1/auth/login`,
+   pulsa **Try it out** y envía las credenciales de arriba.
+2. Copia el `accessToken`, pulsa **Authorize** (arriba a la derecha) y pégalo.
+3. Lista el catálogo (`GET /api/v1/products`) y elige un producto.
+4. Registra una salida mayor al stock en `POST /api/v1/stock/out`: verás el **422** en formato
+   RFC 9457 sin que cambie nada. Luego una salida válida y revisa su historial en
+   `GET /api/v1/products/{id}/movements`.
+5. Intenta algo de admin (por ejemplo `GET /api/v1/reports/low-stock`): verás el **403**.
+
+La cuenta es pública: los datos de la demo pueden cambiar entre visitas.
 
 ![Demo en Swagger: salida sin stock (422 en RFC 9457), salida correcta y reportes](docs/demo.gif)
 

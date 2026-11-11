@@ -28,6 +28,8 @@ services:
       PRISMA_HIDE_UPDATE_MESSAGE: 'true'
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      DEMO_EMAIL: ${DEMO_EMAIL:-}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-}
       DATABASE_URL: postgresql://${POSTGRES_USER:-inventory}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-inventory}
     depends_on:
       db:

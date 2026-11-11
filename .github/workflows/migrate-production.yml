@@ -10,13 +10,16 @@ permissions:
 
 jobs:
   migrate:
-    name: Migraciones y semilla del admin
+    name: Migraciones y semillas
     runs-on: ubuntu-latest
     environment: production
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      # Operador de demostración: credenciales públicas a propósito (están en el README).
+      DEMO_EMAIL: demo@inventario.test
+      DEMO_PASSWORD: demo-inventario-2026
     steps:
       - uses: actions/checkout@v7
 
@@ -35,5 +38,5 @@ jobs:
       - name: Migraciones
         run: npx prisma migrate deploy
 
-      - name: Semilla del admin
+      - name: Semilla del admin y de la demostración
         run: node dist/seed.js
