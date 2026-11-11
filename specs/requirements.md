@@ -53,6 +53,11 @@ Criterios de aceptación en formato EARS.
   DEBE poder gestionar usuarios, modificar el catálogo, hacer ajustes ni ver reportes.
 - CUANDO la base no tiene productos, la semilla de demostración DEBE cargar un catálogo de
   ejemplo genérico (sin datos de clientes) con su stock inicial registrado como entradas.
+- CUANDO el dueño lanza el restablecimiento de la demo escribiendo la confirmación
+  `RESTABLECER`, se DEBEN borrar movimientos, productos y categorías y volver a cargar el
+  catálogo de ejemplo, en una sola transacción; los usuarios se conservan. SIN la confirmación
+  NO DEBE borrarse nada. Es la única excepción a «los movimientos no se borran» y solo existe
+  fuera de la API (workflow manual), nunca como endpoint.
 
 ### RF-02 · Catálogo
 

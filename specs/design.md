@@ -146,6 +146,11 @@ sentencia, dos salidas simultáneas no pueden dejar el stock negativo. Además s
   operador, en una transacción por producto (stock y movimiento juntos). Las credenciales de demo
   son públicas a propósito: están en el README y en el workflow `Migrar producción`. El operador
   no puede crear usuarios ni cambiar el catálogo, así que el daño posible se limita a movimientos.
+- **Restablecer la demo** (`src/demo/reset-demo.ts` + `dist/reset-demo.js`): workflow manual
+  `Restablecer demo` con un campo de confirmación; el script exige
+  `CONFIRM_RESET_DEMO=RESTABLECER` y en una transacción interactiva hace `deleteMany` de
+  `stock_movements`, `products` y `categories` y vuelve a cargar el catálogo con el operador de
+  demo (que se crea o reactiva si hiciera falta). Los usuarios y sus sesiones no se tocan.
 
 ### Catálogo (RF-02)
 
