@@ -1,6 +1,7 @@
 import {
   MovementType,
   Role,
+  type Prisma,
   type PrismaClient,
 } from '../generated/prisma/client.js';
 import { categoryNameKey } from '../catalog/categories.service.js';
@@ -94,10 +95,78 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
   },
 ];
 
-type DemoPrisma = Pick<
-  PrismaClient,
-  'user' | 'product' | 'category' | '$transaction'
->;
+type DemoPrisma = Pick<PrismaClient, 'user' | 'product' | '$transaction'>;
+type CatalogClient = Pick<Prisma.TransactionClient, 'category' | 'product'>;
+
+export const DEMO_RESET_CONFIRMATION = 'RESTABLECER';
+
+function validate({ email, password }: DemoInput): {
+  email: string;
+  password: string;
+} {
+  if (!email || !password) {
+    throw new Error('Define DEMO_EMAIL y DEMO_PASSWORD');
+  }
+  if (password.length < 10) {
+    throw new Error('DEMO_PASSWORD debe tener al menos 10 caracteres');
+  }
+  return { email: normalizeEmail(email), password };
+}
+
+/** Crea o reactiva el operador de demo. Siempre OPERATOR: nunca admin en una cuenta pública. */
+async function upsertOperator(
+  client: Pick<Prisma.TransactionClient, 'user'>,
+  email: string,
+  passwordHash: string,
+): Promise<{ id: string; existed: boolean }> {
+  const existing = await client.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  const operator = await client.user.upsert({
+    where: { email },
+    create: { email, passwordHash, role: Role.OPERATOR },
+    update: { passwordHash, role: Role.OPERATOR, active: true },
+    select: { id: true },
+  });
+  return { id: operator.id, existed: existing !== null };
+}
+
+/** Carga el catálogo de ejemplo con su entrada inicial. Debe correr en una transacción. */
+export async function loadDemoCatalog(
+  tx: CatalogClient,
+  operatorId: string,
+): Promise<number> {
+  for (const item of DEMO_PRODUCTS) {
+    const nameKey = categoryNameKey(item.category);
+    const category = await tx.category.upsert({
+      where: { nameKey },
+      create: { name: item.category, nameKey },
+      update: {},
+      select: { id: true },
+    });
+    await tx.product.create({
+      data: {
+        sku: item.sku,
+        name: item.name,
+        categoryId: category.id,
+        price: item.price,
+        minStock: item.minStock,
+        stock: item.stock,
+        movements: {
+          create: {
+            userId: operatorId,
+            type: MovementType.IN,
+            quantity: item.stock,
+            stockAfter: item.stock,
+            reason: 'Stock inicial',
+          },
+        },
+      },
+    });
+  }
+  return DEMO_PRODUCTS.length;
+}
 
 /**
  * Operador de demostración para reclutadores (specs: RF-01, M6). Crea o
@@ -107,63 +176,63 @@ type DemoPrisma = Pick<
 export async function seedDemo(
   prisma: DemoPrisma,
   hasher: Pick<PasswordHasher, 'hash'>,
-  { email, password }: DemoInput,
+  input: DemoInput,
 ): Promise<DemoResult> {
-  if (!email || !password) return { operator: 'skipped', products: 0 };
-  if (password.length < 10) {
-    throw new Error('DEMO_PASSWORD debe tener al menos 10 caracteres');
+  if (!input.email || !input.password) {
+    return { operator: 'skipped', products: 0 };
   }
-
-  const normalized = normalizeEmail(email);
-  const passwordHash = await hasher.hash(password);
-  const existing = await prisma.user.findUnique({
-    where: { email: normalized },
-    select: { id: true },
-  });
-  // Siempre operador: nunca se le da rol de admin a una cuenta pública.
-  const operator = await prisma.user.upsert({
-    where: { email: normalized },
-    create: { email: normalized, passwordHash, role: Role.OPERATOR },
-    update: { passwordHash, role: Role.OPERATOR, active: true },
-    select: { id: true },
-  });
+  const { email, password } = validate(input);
+  const operator = await upsertOperator(
+    prisma,
+    email,
+    await hasher.hash(password),
+  );
 
   let products = 0;
   if ((await prisma.product.count()) === 0) {
-    for (const item of DEMO_PRODUCTS) {
-      await prisma.$transaction(async (tx) => {
-        const category = await tx.category.upsert({
-          where: { nameKey: categoryNameKey(item.category) },
-          create: {
-            name: item.category,
-            nameKey: categoryNameKey(item.category),
-          },
-          update: {},
-          select: { id: true },
-        });
-        await tx.product.create({
-          data: {
-            sku: item.sku,
-            name: item.name,
-            categoryId: category.id,
-            price: item.price,
-            minStock: item.minStock,
-            stock: item.stock,
-            movements: {
-              create: {
-                userId: operator.id,
-                type: MovementType.IN,
-                quantity: item.stock,
-                stockAfter: item.stock,
-                reason: 'Stock inicial',
-              },
-            },
-          },
-        });
-      });
-      products++;
-    }
+    products = await prisma.$transaction((tx) =>
+      loadDemoCatalog(tx, operator.id),
+    );
   }
+  return { operator: operator.existed ? 'updated' : 'created', products };
+}
 
-  return { operator: existing ? 'updated' : 'created', products };
+export interface ResetResult {
+  deleted: { movements: number; products: number; categories: number };
+  products: number;
+}
+
+/**
+ * Restablece la demo (specs: RF-01, M6): borra movimientos, productos y
+ * categorías y vuelve a cargar el catálogo, todo en una transacción. Los
+ * usuarios se conservan. Sin la confirmación exacta, no toca nada.
+ */
+export async function resetDemo(
+  prisma: Pick<PrismaClient, '$transaction'>,
+  hasher: Pick<PasswordHasher, 'hash'>,
+  input: DemoInput,
+  confirmation: string | undefined,
+): Promise<ResetResult> {
+  if (confirmation !== DEMO_RESET_CONFIRMATION) {
+    throw new Error(
+      `Restablecimiento cancelado: escribe ${DEMO_RESET_CONFIRMATION} para confirmar`,
+    );
+  }
+  const { email, password } = validate(input);
+  const passwordHash = await hasher.hash(password);
+
+  return prisma.$transaction(async (tx) => {
+    const movements = await tx.stockMovement.deleteMany();
+    const products = await tx.product.deleteMany();
+    const categories = await tx.category.deleteMany();
+    const operator = await upsertOperator(tx, email, passwordHash);
+    return {
+      deleted: {
+        movements: movements.count,
+        products: products.count,
+        categories: categories.count,
+      },
+      products: await loadDemoCatalog(tx, operator.id),
+    };
+  });
 }

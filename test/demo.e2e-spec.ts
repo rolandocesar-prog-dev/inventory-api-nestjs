@@ -1,5 +1,10 @@
 import request from 'supertest';
-import { DEMO_PRODUCTS, seedDemo } from '../src/demo/seed-demo.js';
+import {
+  DEMO_PRODUCTS,
+  DEMO_RESET_CONFIRMATION,
+  resetDemo,
+  seedDemo,
+} from '../src/demo/seed-demo.js';
 import { PasswordHasher } from '../src/users/password-hasher.js';
 import { createTestApp, type TestApp } from './utils/app.js';
 import { resetDatabase } from './utils/database.js';
@@ -82,6 +87,44 @@ describe('Operador de demostración (e2e)', () => {
       .get('/api/v1/reports/inventory-value')
       .auth(token, auth)
       .expect(403);
+  });
+
+  it('restablecer borra lo que hicieron las visitas y deja el catálogo inicial', async () => {
+    const admin = await t.users.create({
+      email: 'admin@inventario.test',
+      password: 'clave-admin-segura',
+      role: 'ADMIN',
+    });
+    await t.prisma.category.create({
+      data: { name: 'Creada por una visita', nameKey: 'creada por una visita' },
+    });
+
+    const result = await resetDemo(
+      t.prisma,
+      new PasswordHasher(),
+      DEMO,
+      DEMO_RESET_CONFIRMATION,
+    );
+
+    expect(result.deleted.movements).toBeGreaterThan(DEMO_PRODUCTS.length);
+    expect(await t.prisma.product.count()).toBe(DEMO_PRODUCTS.length);
+    expect(await t.prisma.stockMovement.count()).toBe(DEMO_PRODUCTS.length);
+    expect(
+      await t.prisma.category.count({
+        where: { nameKey: 'creada por una visita' },
+      }),
+    ).toBe(0);
+    const mart = await t.prisma.product.findUniqueOrThrow({
+      where: { sku: 'MART-001' },
+    });
+    expect(mart.stock).toBe(
+      DEMO_PRODUCTS.find((p) => p.sku === 'MART-001')?.stock,
+    );
+    // Los usuarios se conservan y el demo sigue entrando.
+    expect(
+      await t.prisma.user.findUnique({ where: { id: admin.id } }),
+    ).not.toBeNull();
+    await http().post('/api/v1/auth/login').send(DEMO).expect(200);
   });
 
   it('volver a correr la semilla no duplica el catálogo', async () => {

@@ -17,6 +17,7 @@ export default defineConfig({
         'src/generated/**',
         'src/main.ts',
         'src/seed.ts',
+        'src/reset-demo.ts',
         'src/**/*.module.ts',
         'src/**/*.spec.ts',
       ],
