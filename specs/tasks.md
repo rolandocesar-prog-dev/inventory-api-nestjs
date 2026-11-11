@@ -52,5 +52,5 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 
 ## M6 · Demostración para reclutadores
 
-- [ ] Semilla del operador de demo y catálogo de ejemplo.
+- [x] Semilla del operador de demo y catálogo de ejemplo.
 - [ ] Credenciales de demo en el workflow de producción y en el README; login verificado en vivo.
