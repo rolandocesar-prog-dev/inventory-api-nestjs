@@ -46,6 +46,6 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 - [x] Errores en formato RFC 9457.
 - [x] Logs estructurados con `X-Request-ID` y sin datos sensibles (RNF-06).
 - [x] Preparar el despliegue: `TRUST_PROXY`, puerto del healthcheck, `render.yaml` y workflow de migraciones.
-- [ ] Despliegue público en Render + Neon (la API y `/docs`).
+- [x] Despliegue público en Render + Neon (la API y `/docs`).
 - [x] README final con diagrama y ejemplos; colección de peticiones (`.http` o Bruno).
-- [ ] Agregar el proyecto, con enlaces, a la sección Proyectos del CV.
+- [x] Agregar el proyecto, con enlaces, a la sección Proyectos del CV.

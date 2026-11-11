@@ -7,6 +7,11 @@ productos, entradas, salidas y ajustes de stock con **historial auditable (karde
 autenticación con roles y la garantía de que **el stock nunca queda negativo, incluso con
 operaciones simultáneas**.
 
+**En vivo:** [documentación interactiva](https://inventory-api-c5yi.onrender.com/docs) ·
+[estado](https://inventory-api-c5yi.onrender.com/health). Corre en planes gratuitos (Render +
+Neon): la primera visita tras un rato sin uso puede tardar cerca de un minuto en despertar. Las
+operaciones exigen una cuenta; para probarlas de punta a punta, usa Docker (abajo).
+
 ![Demo en Swagger: salida sin stock (422 en RFC 9457), salida correcta y reportes](docs/demo.gif)
 
 ## Qué demuestra
@@ -116,6 +121,18 @@ Ejemplo de error (RFC 9457):
   "requestId": "2f6c8710-1116-4c4f-b625-a8f7f07e0bf0"
 }
 ```
+
+## Despliegue
+
+| Pieza       | Dónde                                    | Cómo                                                                                 |
+| ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| API         | Render, servicio web gratuito con Docker | Blueprint [`render.yaml`](./render.yaml); despliega solo commits con el CI en verde. |
+| PostgreSQL  | Neon, plan gratuito (no vence)           | Conexión directa con TLS; `DATABASE_URL` solo en Render y en GitHub.                 |
+| Migraciones | GitHub Actions, workflow manual          | «Migrar producción»: `prisma migrate deploy` y semilla del admin.                    |
+
+Detrás del proxy de Render, `TRUST_PROXY=true` hace que el límite del login cuente por la IP real
+del cliente; comprobado en producción: el sexto intento responde 429 y falsificar
+`X-Forwarded-For` no lo evita.
 
 ## Cómo ejecutarlo
 
