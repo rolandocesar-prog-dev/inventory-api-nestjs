@@ -49,3 +49,8 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 - [x] Despliegue público en Render + Neon (la API y `/docs`).
 - [x] README final con diagrama y ejemplos; colección de peticiones (`.http` o Bruno).
 - [x] Agregar el proyecto, con enlaces, a la sección Proyectos del CV.
+
+## M6 · Demostración para reclutadores
+
+- [ ] Semilla del operador de demo y catálogo de ejemplo.
+- [ ] Credenciales de demo en el workflow de producción y en el README; login verificado en vivo.

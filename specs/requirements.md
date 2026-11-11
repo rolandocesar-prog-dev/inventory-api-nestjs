@@ -48,6 +48,11 @@ Criterios de aceptación en formato EARS.
   sin administradores).
 - Las contraseñas DEBEN guardarse con un hash lento (argon2 o bcrypt), nunca en texto plano, y
   tener al menos 10 caracteres.
+- La API publicada DEBE ofrecer un **operador de demostración** con credenciales públicas en el
+  README, para que un reclutador pruebe el flujo completo desde `/docs`. Al ser operador, NO
+  DEBE poder gestionar usuarios, modificar el catálogo, hacer ajustes ni ver reportes.
+- CUANDO la base no tiene productos, la semilla de demostración DEBE cargar un catálogo de
+  ejemplo genérico (sin datos de clientes) con su stock inicial registrado como entradas.
 
 ### RF-02 · Catálogo
 

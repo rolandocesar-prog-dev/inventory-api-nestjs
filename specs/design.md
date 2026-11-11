@@ -140,6 +140,12 @@ sentencia, dos salidas simultáneas no pueden dejar el stock negativo. Además s
   el tiempo de respuesta no revela qué correos existen.
 - **Semilla**: `npm run seed` (y el servicio `migrate` de Docker) crea o actualiza el admin con
   `ADMIN_EMAIL` y `ADMIN_PASSWORD`; si faltan, no hace nada.
+- **Demostración** (`src/demo/seed-demo.ts`): con `DEMO_EMAIL` y `DEMO_PASSWORD`, la misma
+  semilla crea o actualiza un usuario **OPERATOR** activo y, solo si no hay productos, carga 4
+  categorías y 8 productos de ferretería con su entrada inicial («Stock inicial») hecha por ese
+  operador, en una transacción por producto (stock y movimiento juntos). Las credenciales de demo
+  son públicas a propósito: están en el README y en el workflow `Migrar producción`. El operador
+  no puede crear usuarios ni cambiar el catálogo, así que el daño posible se limita a movimientos.
 
 ### Catálogo (RF-02)
 
