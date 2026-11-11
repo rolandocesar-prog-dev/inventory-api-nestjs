@@ -253,3 +253,24 @@ como contenedor de servicio del job.
   detalle en `error`. El _healthcheck_ de Docker llama a esta ruta.
 - **Puertos locales**: el `docker-compose.yml` publica PostgreSQL en `127.0.0.1:5443` (5432,
   5433 y 5442 los usan otros proyectos del equipo) y la API en `127.0.0.1:3000`.
+
+## 7. Despliegue público (RNF-07, RNF-08)
+
+| Pieza          | Servicio                | Plan gratuito (verificado el 2026-11-10)                    |
+| -------------- | ----------------------- | ----------------------------------------------------------- |
+| API (Docker)   | Render, servicio web    | 750 h/mes, sin tarjeta; se duerme tras 15 min sin tráfico.  |
+| PostgreSQL 16+ | Neon                    | 1 GB, no vence, sin tarjeta; se suspende tras 5 min.        |
+| Migraciones    | GitHub Actions (manual) | Workflow `Migrar producción` con el secreto `DATABASE_URL`. |
+
+- No se usa la base gratuita de Render porque **vence a los 30 días**.
+- **`render.yaml`** (Blueprint): servicio `web`, `runtime: docker`, `plan: free`, región
+  `ohio` (cerca de Neon `aws-us-east-2`), `healthCheckPath: /health`; `JWT_SECRET` lo genera
+  Render; `DATABASE_URL` se carga a mano (`sync: false`) y nunca va al repositorio.
+- **Migraciones y semilla**: Render gratis no tiene comando previo al despliegue, así que el
+  workflow manual corre `prisma migrate deploy` y la semilla del admin contra Neon con los
+  secretos `DATABASE_URL`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` del repositorio.
+- **`TRUST_PROXY`** (por defecto `false`): con `true`, Express confía en el primer proxy
+  (`trust proxy = 1`) y el throttler limita por la IP real del cliente, no la del balanceador.
+- **Puerto**: Render define `PORT`; el _healthcheck_ de la imagen usa `${PORT:-3000}`.
+- **Arranque en frío**: la primera petición tras inactividad tarda (Render ≈ 1 min y Neon
+  ≈ 1 s); el README lo avisa. Sin credenciales públicas: la demo en vivo es `/docs` y `/health`.

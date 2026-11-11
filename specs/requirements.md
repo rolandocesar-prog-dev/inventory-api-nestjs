@@ -110,6 +110,8 @@ Criterios de aceptación en formato EARS.
 | RNF-04 | Cobertura ≥ 80 % en servicios; pruebas e2e contra PostgreSQL real en CI.   |
 | RNF-05 | Imagen Docker multi-etapa, sin usuario root y con _healthcheck_.           |
 | RNF-06 | Logs estructurados con id de petición; sin datos sensibles en los logs.    |
+| RNF-07 | Despliegue público sin costo: planes gratuitos sin tarjeta de crédito.     |
+| RNF-08 | Detrás del proxy de la plataforma, el límite del login usa la IP real.     |
 
 ## 6. Criterio de "terminado"
 
