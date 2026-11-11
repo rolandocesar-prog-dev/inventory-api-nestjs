@@ -1,0 +1,26 @@
+# Blueprint de Render: la API como servicio web gratuito con Docker (specs/design.md §7).
+# La base de datos está en Neon (gratis y sin vencimiento); las migraciones las aplica el
+# workflow manual «Migrar producción» de GitHub Actions.
+services:
+  - type: web
+    name: inventory-api
+    runtime: docker
+    plan: free
+    region: ohio
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    # Solo despliega commits con el CI en verde.
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: TRUST_PROXY
+        value: 'true'
+      - key: JWT_SECRET
+        generateValue: true
+      # Cadena de conexión directa (sin pooler) de Neon; se carga a mano al crear el Blueprint.
+      - key: DATABASE_URL
+        sync: false

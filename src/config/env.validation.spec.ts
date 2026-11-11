@@ -26,6 +26,19 @@ describe('validateEnv', () => {
     expect(env.PORT).toBe(3000);
   });
 
+  it('TRUST_PROXY es false por defecto y acepta "true" o "false" como texto', () => {
+    expect(validateEnv(valid).TRUST_PROXY).toBe(false);
+    expect(validateEnv({ ...valid, TRUST_PROXY: 'true' }).TRUST_PROXY).toBe(
+      true,
+    );
+    expect(validateEnv({ ...valid, TRUST_PROXY: 'false' }).TRUST_PROXY).toBe(
+      false,
+    );
+    expect(() => validateEnv({ ...valid, TRUST_PROXY: 'si' })).toThrow(
+      /TRUST_PROXY/,
+    );
+  });
+
   it('falla si falta DATABASE_URL', () => {
     expect(() => validateEnv({})).toThrow(/DATABASE_URL/);
   });

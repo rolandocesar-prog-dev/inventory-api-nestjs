@@ -1,0 +1,39 @@
+name: Migrar producción
+
+# Manual: aplica las migraciones pendientes a la base de producción (Neon) y crea o
+# actualiza el admin. Render gratis no tiene comando previo al despliegue (specs/design.md §7).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Migraciones y semilla del admin
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build (genera el cliente de Prisma)
+        run: npm run build
+
+      - name: Migraciones
+        run: npx prisma migrate deploy
+
+      - name: Semilla del admin
+        run: node dist/seed.js

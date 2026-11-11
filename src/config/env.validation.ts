@@ -1,5 +1,6 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsIn,
   IsInt,
@@ -48,6 +49,20 @@ export class EnvironmentVariables {
   /** Nivel de los logs JSON (RNF-06). */
   @IsIn(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
   LOG_LEVEL: string = 'info';
+
+  /** Detrás de un proxy (Render): confiar en el primero para ver la IP real (RNF-08). */
+  // Se lee el texto original: la conversión implícita haría Boolean('false') === true.
+  @Transform(({ obj }: { obj: Record<string, unknown> }) => {
+    const raw = obj['TRUST_PROXY'];
+    if (raw === undefined) return false;
+    return raw === 'true' || raw === true
+      ? true
+      : raw === 'false' || raw === false
+        ? false
+        : raw;
+  })
+  @IsBoolean()
+  TRUST_PROXY: boolean = false;
 }
 
 /**
