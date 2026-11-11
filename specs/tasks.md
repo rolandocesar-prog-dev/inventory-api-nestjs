@@ -54,4 +54,4 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 
 - [x] Semilla del operador de demo y catálogo de ejemplo.
 - [x] Credenciales de demo en el workflow de producción y en el README; login verificado en vivo.
-- [ ] Workflow manual para restablecer los datos de la demo, con confirmación.
+- [x] Workflow manual para restablecer los datos de la demo, con confirmación.

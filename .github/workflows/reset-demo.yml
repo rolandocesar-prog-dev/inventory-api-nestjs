@@ -1,0 +1,50 @@
+name: Restablecer demo
+
+# Manual: borra movimientos, productos y categorías de producción y vuelve a cargar el
+# catálogo de ejemplo de la demo (specs/design.md §3, Demostración). Los usuarios se conservan.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribe RESTABLECER para borrar los datos de la demo'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  reset:
+    name: Restablecer los datos de la demo
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Operador de demostración: credenciales públicas a propósito (están en el README).
+      DEMO_EMAIL: demo@inventario.test
+      DEMO_PASSWORD: demo-inventario-2026
+      # El script vuelve a comprobarla: sin RESTABLECER no borra nada.
+      CONFIRM_RESET_DEMO: ${{ inputs.confirmacion }}
+    steps:
+      - name: Confirmación
+        if: ${{ inputs.confirmacion != 'RESTABLECER' }}
+        run: |
+          echo "::error::Restablecimiento cancelado: escribe RESTABLECER para confirmar."
+          exit 1
+
+      - uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build (genera el cliente de Prisma)
+        run: npm run build
+
+      - name: Restablecer
+        run: node dist/reset-demo.js

@@ -26,7 +26,9 @@ Neon): la primera visita tras un rato sin uso puede tardar cerca de un minuto en
    `GET /api/v1/products/{id}/movements`.
 5. Intenta algo de admin (por ejemplo `GET /api/v1/reports/low-stock`): verás el **403**.
 
-La cuenta es pública: los datos de la demo pueden cambiar entre visitas.
+La cuenta es pública: los datos de la demo pueden cambiar entre visitas. El workflow manual
+**Restablecer demo** (pide escribir `RESTABLECER`) borra movimientos, productos y categorías y
+vuelve a cargar el catálogo de ejemplo en una sola transacción; los usuarios se conservan.
 
 ![Demo en Swagger: salida sin stock (422 en RFC 9457), salida correcta y reportes](docs/demo.gif)
 
