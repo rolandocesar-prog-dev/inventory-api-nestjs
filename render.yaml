@@ -19,6 +19,9 @@ services:
         value: info
       - key: TRUST_PROXY
         value: 'true'
+      # Clientes web que pueden llamar a la API: el panel publicado en GitHub Pages.
+      - key: CORS_ORIGINS
+        value: https://rolandocesar-prog-dev.github.io
       - key: JWT_SECRET
         generateValue: true
       # Cadena de conexión directa (sin pooler) de Neon; se carga a mano al crear el Blueprint.

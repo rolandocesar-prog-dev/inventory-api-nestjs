@@ -59,3 +59,4 @@ Cada tarea referencia su requisito. Marca `[x]` al terminar y haz un commit por 
 ## M7 · Clientes web
 
 - [x] CORS configurable con `CORS_ORIGINS` para la versión web del escáner de facturas.
+- [x] `CORS_ORIGINS` en Render con el origen del panel web publicado en GitHub Pages.
